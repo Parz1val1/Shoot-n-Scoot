@@ -12,15 +12,22 @@ public class LevelUI : MonoBehaviour
     public GameObject pauseScreen;
     public TextMeshProUGUI pauseButton;
     public Image[] hearts = new Image[3];
+    public GameObject[] coins = new GameObject[3];
     public TextMeshProUGUI arrows;
-    public int arrowNum, playerHealth;
+    public int arrowNum, playerHealth, coinNum;
+    public static int turns;
     // Start is called before the first frame update
     void Start()
     {
+        foreach(GameObject g in coins)
+        {
+            g.SetActive(false);
+        }
         pauseScreen.SetActive(false);
         arrowNum = Player.arrows;
         playerHealth = Player.health;
         arrows.text = ("x" + arrowNum);
+        turns = 0;
     }
 
     // Update is called once per frame
@@ -28,6 +35,7 @@ public class LevelUI : MonoBehaviour
     {
         updateArrows();
         updateHealth();
+        updateCoins();
     }
 
     public void pause()
@@ -68,6 +76,15 @@ public class LevelUI : MonoBehaviour
         {
             playerHealth = Player.health;
             hearts[playerHealth].sprite = Resources.Load<Sprite>("Tiny RPG Forest/Artwork/sprites/misc/hearts/hearts-2");
+        }
+    }
+
+    public void updateCoins()
+    {
+        if (coinNum != Player.coinCount)
+        {
+            coins[coinNum].SetActive(true);
+            coinNum = Player.coinCount;
         }
     }
 
