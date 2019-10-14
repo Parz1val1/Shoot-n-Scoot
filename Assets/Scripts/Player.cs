@@ -5,13 +5,14 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    public static int health, arrows, coinCount;
+    public static int health, arrows, coinCount, kills;
     public static bool paused;
     private Vector2 fingerDown;
     private Vector2 fingerUp;
     public bool detectSwipeOnlyAfterRelease = true;
     public float SWIPE_THRESHOLD = 20f;
-    public GameObject[] coins;
+    public GameObject coin1, coin2, coin3;
+
 
     // Start is called before the first frame update
     void Start()
@@ -57,20 +58,35 @@ public class Player : MonoBehaviour
         {
             OnSwipeRight();
         }
-        else if (Input.GetKeyDown(KeyCode.UpArrow)){
+        else if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
             OnSwipeUp();
         }
-        else if (Input.GetKeyDown(KeyCode.DownArrow)){
+        else if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
             OnSwipeDown();
         }
 
-        foreach (GameObject g in coins)
+        if (coin1 != null && Vector2.Distance(this.transform.position, coin1.transform.position) < 1)
         {
-            if (Vector2.Distance(this.transform.position, g.transform.position) < 1)
-            {
-                coinCount++;
-                g.SetActive(false);
-            }
+            coin1.SetActive(false);
+            coin1 = null;
+            coinCount++;
+            Debug.Log("coin1");
+        }
+        else if (coin2 != null && Vector2.Distance(this.transform.position, coin2.transform.position) < 1)
+        {
+            coin2.SetActive(false);
+            coin2 = null;
+            coinCount++;
+            Debug.Log("coin2");
+        }
+        else if (coin3 != null && Vector2.Distance(this.transform.position, coin3.transform.position) < 1)
+        {
+            coin3.SetActive(false);
+            coin3 = null;
+            coinCount++;
+            Debug.Log("coin3");
         }
     }
 
@@ -129,7 +145,7 @@ public class Player : MonoBehaviour
         Debug.Log("Swipe UP");
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.up);
         //Debug.Log(Vector2.Distance(transform.position, hit.point));
-        if (Vector2.Distance(transform.position, hit.point) > 1)
+        if (hit.collider.gameObject.tag == "Enemy" || Vector2.Distance(transform.position, hit.point) > 1)
         {
             iTween.MoveTo(this.gameObject, (this.transform.position - new Vector3(0, -2, 0)), 1);
         }
@@ -140,7 +156,7 @@ public class Player : MonoBehaviour
     {
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down);
         //Debug.Log(Vector2.Distance(transform.position, hit.point));
-        if (Vector2.Distance(transform.position, hit.point) > 1)
+        if (hit.collider.gameObject.tag == "Enemy" || Vector2.Distance(transform.position, hit.point) > 1)
         {
             Debug.Log("Swipe Down");
             iTween.MoveTo(this.gameObject, (this.transform.position - new Vector3(0, 2, 0)), 1);
@@ -154,7 +170,7 @@ public class Player : MonoBehaviour
         Debug.Log("Swipe Left");
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.left);
         //Debug.Log(Vector2.Distance(transform.position, hit.point));
-        if (Vector2.Distance(transform.position, hit.point) > 1)
+        if (hit.collider.gameObject.tag == "Enemy" || Vector2.Distance(transform.position, hit.point) > 1)
         {
             iTween.MoveTo(this.gameObject, (this.transform.position - new Vector3(2, 0, 0)), 1);
         }
@@ -167,7 +183,7 @@ public class Player : MonoBehaviour
         Debug.Log("Swipe Right");
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.right);
         //Debug.Log(Vector2.Distance(transform.position, hit.point));
-        if (Vector2.Distance(transform.position, hit.point) > 1)
+        if (hit.collider.gameObject.tag == "Enemy" || Vector2.Distance(transform.position, hit.point) > 1)
         {
             iTween.MoveTo(this.gameObject, (this.transform.position - new Vector3(-2, 0, 0)), 1);
         }
@@ -176,4 +192,30 @@ public class Player : MonoBehaviour
     }
 
 
+    //private void OnCollisionEnter2D(Collider2D collider)
+    //{
+    //    Debug.Log(collider.gameObject.tag);
+    //    if(collider.gameObject.tag == "Finish")
+    //    {
+    //        LevelUI.won = true;
+    //    }
+    //    else if (collider.gameObject.tag == "Enemy")
+    //    {
+    //        health--;
+    //        collider.gameObject.SetActive(false);
+    //    }
+    //}
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.tag == "Finish")
+        {
+            LevelUI.won = true;
+        }
+        else if (other.gameObject.tag == "Enemy")
+        {
+            health--;
+            other.gameObject.SetActive(false);
+        }
+    }
 }

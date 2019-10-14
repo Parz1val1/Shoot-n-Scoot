@@ -9,13 +9,14 @@ using UnityEngine.SceneManagement;
 public class LevelUI : MonoBehaviour
 {
     private string playText = "►", pauseText = "II", menu = "StartScene";
-    public GameObject pauseScreen;
+    public GameObject pauseScreen, winScreen;
     public TextMeshProUGUI pauseButton;
     public Image[] hearts = new Image[3];
     public GameObject[] coins = new GameObject[3];
     public TextMeshProUGUI arrows;
     public int arrowNum, playerHealth, coinNum;
     public static int turns;
+    public static bool won;
     // Start is called before the first frame update
     void Start()
     {
@@ -24,8 +25,10 @@ public class LevelUI : MonoBehaviour
             g.SetActive(false);
         }
         pauseScreen.SetActive(false);
+        winScreen.SetActive(false);
         arrowNum = Player.arrows;
         playerHealth = Player.health;
+        coinNum = Player.coinCount;
         arrows.text = ("x" + arrowNum);
         turns = 0;
     }
@@ -61,6 +64,26 @@ public class LevelUI : MonoBehaviour
         SceneManager.LoadScene(menu);
     }
 
+    public void loadLevel1()
+    {
+        SceneManager.LoadScene("Level1");
+    }
+
+    public void loadLevel2()
+    {
+        SceneManager.LoadScene("Level2");
+    }
+
+    public void loadLevel3()
+    {
+        SceneManager.LoadScene("Level3");
+    }
+
+    public void loadLevel4()
+    {
+        SceneManager.LoadScene("Level4");
+    }
+
     public void updateArrows()
     {
         if (Player.arrows != arrowNum)
@@ -83,8 +106,9 @@ public class LevelUI : MonoBehaviour
     {
         if (coinNum != Player.coinCount)
         {
-            coins[coinNum].SetActive(true);
             coinNum = Player.coinCount;
+            coins[coinNum-1].SetActive(true);
+            Debug.Log("test");
         }
     }
 
