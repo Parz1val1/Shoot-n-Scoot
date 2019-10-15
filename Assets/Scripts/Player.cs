@@ -6,17 +6,22 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     public static int health, arrows, coinCount, kills;
-    public static bool paused;
+    public static bool paused, won;
     private Vector2 fingerDown;
     private Vector2 fingerUp;
     public bool detectSwipeOnlyAfterRelease = true;
     public float SWIPE_THRESHOLD = 20f;
-    public GameObject coin1, coin2, coin3;
+    public GameObject coin1, coin2, coin3, enemy1, enemy2, enemy3, enemy4, finish;
 
 
     // Start is called before the first frame update
     void Start()
     {
+        
+    }
+    private void Awake()
+    {
+        won = false;
         health = 3;
         arrows = 2;
         coinCount = 0;
@@ -50,44 +55,80 @@ public class Player : MonoBehaviour
                 checkSwipe();
             }
         }
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        if (Vector2.Distance(this.transform.position, finish.transform.position) < 1)
+        {
+            won = true;
+            Debug.Log("won true");
+        }
+
+        if (Input.GetKeyDown(KeyCode.LeftArrow) && !paused)
         {
             OnSwipeLeft();
         }
-        else if (Input.GetKeyDown(KeyCode.RightArrow))
+        else if (Input.GetKeyDown(KeyCode.RightArrow) && !paused)
         {
             OnSwipeRight();
         }
-        else if (Input.GetKeyDown(KeyCode.UpArrow))
+        else if (Input.GetKeyDown(KeyCode.UpArrow) && !paused)
         {
             OnSwipeUp();
         }
-        else if (Input.GetKeyDown(KeyCode.DownArrow))
+        else if (Input.GetKeyDown(KeyCode.DownArrow) && !paused)
         {
             OnSwipeDown();
         }
 
-        if (coin1 != null && Vector2.Distance(this.transform.position, coin1.transform.position) < 1)
+        if (coin1.active && Vector2.Distance(this.transform.position, coin1.transform.position) < 1)
         {
             coin1.SetActive(false);
-            coin1 = null;
             coinCount++;
             Debug.Log("coin1");
         }
-        else if (coin2 != null && Vector2.Distance(this.transform.position, coin2.transform.position) < 1)
+        else if (coin2.active && Vector2.Distance(this.transform.position, coin2.transform.position) < 1)
         {
             coin2.SetActive(false);
-            coin2 = null;
             coinCount++;
             Debug.Log("coin2");
         }
-        else if (coin3 != null && Vector2.Distance(this.transform.position, coin3.transform.position) < 1)
+        else if (coin3.active && Vector2.Distance(this.transform.position, coin3.transform.position) < 1)
         {
             coin3.SetActive(false);
-            coin3 = null;
             coinCount++;
             Debug.Log("coin3");
         }
+        else if(enemy1.active && Vector2.Distance(this.transform.position, enemy1.transform.position) < 1)
+        {
+            enemy1.SetActive(false);
+            kills++;
+            health--;
+            Debug.Log("enemy1");
+        }
+        else if (enemy2.active && Vector2.Distance(this.transform.position, enemy2.transform.position) < 1)
+        {
+            enemy2.SetActive(false);
+            kills++;
+            health--;
+            Debug.Log("enemy2");
+        }
+        else if (enemy3.active && Vector2.Distance(this.transform.position, enemy3.transform.position) < 1)
+        {
+            enemy3.SetActive(false);
+            kills++;
+            health--;
+            Debug.Log("enemy3");
+        }
+        else if (enemy4.active && Vector2.Distance(this.transform.position, enemy4.transform.position) < 1)
+        {
+            enemy4.SetActive(false);
+            kills++;
+            health--;
+            Debug.Log("enemy4");
+        }
+        //if(Vector2.Distance(this.transform.position, finish.transform.position) < 1)
+        //{
+        //    won = true;
+        //    Debug.Log("won true");
+        //}
     }
 
     void checkSwipe()
@@ -190,32 +231,6 @@ public class Player : MonoBehaviour
         LevelUI.turns++;
 
     }
-
-
-    //private void OnCollisionEnter2D(Collider2D collider)
-    //{
-    //    Debug.Log(collider.gameObject.tag);
-    //    if(collider.gameObject.tag == "Finish")
-    //    {
-    //        LevelUI.won = true;
-    //    }
-    //    else if (collider.gameObject.tag == "Enemy")
-    //    {
-    //        health--;
-    //        collider.gameObject.SetActive(false);
-    //    }
-    //}
-
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.gameObject.tag == "Finish")
-        {
-            LevelUI.won = true;
-        }
-        else if (other.gameObject.tag == "Enemy")
-        {
-            health--;
-            other.gameObject.SetActive(false);
-        }
-    }
+    
+    
 }

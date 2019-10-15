@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 public class LevelUI : MonoBehaviour
 {
     private string playText = "►", pauseText = "II", menu = "StartScene";
-    public GameObject pauseScreen, winScreen;
+    public GameObject pauseScreen, winScreen, loseScreen;
     public TextMeshProUGUI pauseButton;
     public Image[] hearts = new Image[3];
     public GameObject[] coins = new GameObject[3];
@@ -20,12 +20,28 @@ public class LevelUI : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        foreach(GameObject g in coins)
+        //foreach(GameObject g in coins)
+        //{
+        //    g.SetActive(false);
+        //}
+        //pauseScreen.SetActive(false);
+        //winScreen.SetActive(false);
+        //loseScreen.SetActive(false);
+        //arrowNum = Player.arrows;
+        //playerHealth = Player.health;
+        //coinNum = Player.coinCount;
+        //arrows.text = ("x" + arrowNum);
+        //turns = 0;
+    }
+    private void Awake()
+    {
+        foreach (GameObject g in coins)
         {
             g.SetActive(false);
         }
         pauseScreen.SetActive(false);
         winScreen.SetActive(false);
+        loseScreen.SetActive(false);
         arrowNum = Player.arrows;
         playerHealth = Player.health;
         coinNum = Player.coinCount;
@@ -39,6 +55,7 @@ public class LevelUI : MonoBehaviour
         updateArrows();
         updateHealth();
         updateCoins();
+        win(Player.won);
     }
 
     public void pause()
@@ -100,6 +117,12 @@ public class LevelUI : MonoBehaviour
             playerHealth = Player.health;
             hearts[playerHealth].sprite = Resources.Load<Sprite>("Tiny RPG Forest/Artwork/sprites/misc/hearts/hearts-2");
         }
+        if(playerHealth <= 0)
+        {
+            loseScreen.SetActive(true);
+            Player.paused = true;
+            Time.timeScale = 0;
+        }
     }
 
     public void updateCoins()
@@ -109,6 +132,16 @@ public class LevelUI : MonoBehaviour
             coinNum = Player.coinCount;
             coins[coinNum-1].SetActive(true);
             Debug.Log("test");
+        }
+    }
+
+    public void win(bool won)
+    {
+        if (won)
+        {
+            winScreen.SetActive(true);
+            Player.paused = true;
+            Time.timeScale = 0;
         }
     }
 
