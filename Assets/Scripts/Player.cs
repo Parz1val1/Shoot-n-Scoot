@@ -2,29 +2,40 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
+using TMPro;
 public class Player : MonoBehaviour
 {
     public static int health, arrows, coinCount, kills;
     public static bool paused, won;
     private Vector2 fingerDown;
     private Vector2 fingerUp;
+    private Scene scene;
     public bool detectSwipeOnlyAfterRelease = true;
     public float SWIPE_THRESHOLD = 20f;
     public GameObject coin1, coin2, coin3, enemy1, enemy2, enemy3, enemy4, finish;
+    Animator playerAnimator;
+    public TextMeshProUGUI test;
 
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
     private void Awake()
     {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+        SceneManager.sceneLoaded += OnSceneLoaded;
+        scene = SceneManager.GetActiveScene();
+        OnSceneLoaded(scene, LoadSceneMode.Additive);
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (!string.Equals(scene.path, this.scene.path)) return;
+        Debug.Log("Re-Initializing", this);
         won = false;
         health = 3;
         arrows = 2;
         coinCount = 0;
+        paused = false;
+        playerAnimator = gameObject.GetComponent<Animator>();
     }
 
     void Update()
@@ -96,7 +107,7 @@ public class Player : MonoBehaviour
             coinCount++;
             Debug.Log("coin3");
         }
-        else if(enemy1.active && Vector2.Distance(this.transform.position, enemy1.transform.position) < 1)
+        else if (enemy1.active && Vector2.Distance(this.transform.position, enemy1.transform.position) < 1)
         {
             enemy1.SetActive(false);
             kills++;
@@ -124,11 +135,8 @@ public class Player : MonoBehaviour
             health--;
             Debug.Log("enemy4");
         }
-        //if(Vector2.Distance(this.transform.position, finish.transform.position) < 1)
-        //{
-        //    won = true;
-        //    Debug.Log("won true");
-        //}
+
+        shoot();
     }
 
     void checkSwipe()
@@ -186,8 +194,9 @@ public class Player : MonoBehaviour
         Debug.Log("Swipe UP");
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.up);
         //Debug.Log(Vector2.Distance(transform.position, hit.point));
-        if (hit.collider.gameObject.tag == "Enemy" || Vector2.Distance(transform.position, hit.point) > 1)
+        if (hit.collider.gameObject.tag == "Enemy" || Vector2.Distance(transform.position, hit.point) > 1 && !paused)
         {
+            playerAnimator.SetTrigger("WalkUp");
             iTween.MoveTo(this.gameObject, (this.transform.position - new Vector3(0, -2, 0)), 1);
         }
         LevelUI.turns++;
@@ -195,11 +204,12 @@ public class Player : MonoBehaviour
 
     void OnSwipeDown()
     {
+        Debug.Log("Swipe Down");
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down);
         //Debug.Log(Vector2.Distance(transform.position, hit.point));
-        if (hit.collider.gameObject.tag == "Enemy" || Vector2.Distance(transform.position, hit.point) > 1)
+        if (hit.collider.gameObject.tag == "Enemy" || Vector2.Distance(transform.position, hit.point) > 1 && !paused)
         {
-            Debug.Log("Swipe Down");
+            playerAnimator.SetTrigger("WalkDown");
             iTween.MoveTo(this.gameObject, (this.transform.position - new Vector3(0, 2, 0)), 1);
         }
         LevelUI.turns++;
@@ -211,8 +221,9 @@ public class Player : MonoBehaviour
         Debug.Log("Swipe Left");
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.left);
         //Debug.Log(Vector2.Distance(transform.position, hit.point));
-        if (hit.collider.gameObject.tag == "Enemy" || Vector2.Distance(transform.position, hit.point) > 1)
+        if (hit.collider.gameObject.tag == "Enemy" || Vector2.Distance(transform.position, hit.point) > 1 && !paused)
         {
+            playerAnimator.SetTrigger("WalkLeft");
             iTween.MoveTo(this.gameObject, (this.transform.position - new Vector3(2, 0, 0)), 1);
         }
         LevelUI.turns++;
@@ -224,13 +235,26 @@ public class Player : MonoBehaviour
         Debug.Log("Swipe Right");
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.right);
         //Debug.Log(Vector2.Distance(transform.position, hit.point));
-        if (hit.collider.gameObject.tag == "Enemy" || Vector2.Distance(transform.position, hit.point) > 1)
+        if (hit.collider.gameObject.tag == "Enemy" || Vector2.Distance(transform.position, hit.point) > 1 && !paused)
         {
+            playerAnimator.SetTrigger("WalkRight");
             iTween.MoveTo(this.gameObject, (this.transform.position - new Vector3(-2, 0, 0)), 1);
         }
         LevelUI.turns++;
 
     }
-    
-    
+
+    //Not working
+    void shoot()
+    {
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began && !EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId))
+        {
+            Vector2 dir = Input.GetTouch(0).position - (Vector2)transform.position;
+            float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+            test.text = ("Angle" + angle);
+        }
+    }
+
+
+
 }
