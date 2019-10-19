@@ -12,11 +12,12 @@ public class Player : MonoBehaviour
     private Vector2 fingerDown;
     private Vector2 fingerUp;
     private Scene scene;
-    public bool detectSwipeOnlyAfterRelease = true;
-    public float SWIPE_THRESHOLD = 20f;
-    public GameObject coin1, coin2, coin3, enemy1, enemy2, enemy3, enemy4, finish;
+    public bool detectSwipeOnlyAfterRelease = true, tap;
+    public float SWIPE_THRESHOLD = 40f, timer;
+    public GameObject coin1, coin2, coin3, enemy1, enemy2, enemy3, enemy4, arrow, finish;
+    public GameObject[] arrowSpawns;
     Animator playerAnimator;
-    public TextMeshProUGUI test;
+    int index = 0;
 
     private void Awake()
     {
@@ -32,19 +33,32 @@ public class Player : MonoBehaviour
         Debug.Log("Re-Initializing", this);
         won = false;
         health = 3;
-        arrows = 2;
+        if (scene.name == "Level1")
+        {
+            arrows = 100;
+        }
         coinCount = 0;
         paused = false;
         playerAnimator = gameObject.GetComponent<Animator>();
+        timer = 0;
     }
 
     void Update()
     {
+        //if(timer <= 0)
+        //{
+        //    shoot();
+        //}
+        //else
+        //{
+        //    timer -= Time.deltaTime;
+        //}
 
         foreach (Touch touch in Input.touches)
         {
             if (touch.phase == TouchPhase.Began)
             {
+                tap = true;
                 fingerUp = touch.position;
                 fingerDown = touch.position;
             }
@@ -63,7 +77,15 @@ public class Player : MonoBehaviour
             if (touch.phase == TouchPhase.Ended)
             {
                 fingerDown = touch.position;
+                if (Vector2.Distance(fingerDown, fingerUp) > SWIPE_THRESHOLD)
+                {
+                    tap = false;
+                }
                 checkSwipe();
+                if (tap)
+                {
+                    shoot();
+                }
             }
         }
         if (Vector2.Distance(this.transform.position, finish.transform.position) < 1)
@@ -135,8 +157,6 @@ public class Player : MonoBehaviour
             health--;
             Debug.Log("enemy4");
         }
-
-        shoot();
     }
 
     void checkSwipe()
@@ -247,14 +267,113 @@ public class Player : MonoBehaviour
     //Not working
     void shoot()
     {
-        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began && !EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId))
+        if (Input.touchCount > 0 && (verticalMove() < SWIPE_THRESHOLD || horizontalValMove() < SWIPE_THRESHOLD) && !EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId))
         {
-            Vector2 dir = Input.GetTouch(0).position - (Vector2)transform.position;
-            float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-            test.text = ("Angle" + angle);
+            Vector2 shootDirection;
+            shootDirection = Input.GetTouch(0).position;
+            shootDirection = Camera.main.ScreenToWorldPoint(shootDirection);
+            shootDirection = shootDirection - (Vector2)transform.position;
+            float least = float.MaxValue;
+            if (Vector2.Distance(shootDirection, Vector2.up) < least)
+            {
+                least = Vector2.Distance(shootDirection, Vector2.up);
+                index = 0;
+            }
+            if (Vector2.Distance(shootDirection, Vector2.down) < least)
+            {
+                least = Vector2.Distance(shootDirection, Vector2.down);
+                index = 1;
+            }
+            if (Vector2.Distance(shootDirection, Vector2.left) < least)
+            {
+                least = Vector2.Distance(shootDirection, Vector2.left);
+                index = 2;
+            }
+            if (Vector2.Distance(shootDirection, Vector2.right) < least)
+            {
+                least = Vector2.Distance(shootDirection, Vector2.right);
+                index = 3;
+            }
+            if (arrows > 0)
+            {
+                if (index == 0)
+                {
+                    playerAnimator.SetTrigger("ShootUp");
+                    Debug.Log("SHOOTUP");
+                }
+                else if (index == 1)
+                {
+                    playerAnimator.SetTrigger("ShootDown");
+                }
+                else if (index == 2)
+                {
+                    playerAnimator.SetTrigger("ShootLeft");
+                }
+                else if (index == 3)
+                {
+                    playerAnimator.SetTrigger("ShootRight");
+                }
+                //GameObject tempArrow = Instantiate(arrow, arrowSpawns[index].transform.position, arrowSpawns[index].transform.rotation) ;
+                arrows--;
+                LevelUI.turns++;
+                timer = 1;
+            }
+        }
+        else if (Input.GetMouseButtonDown(0))
+        {
+            Vector2 shootDirection;
+            shootDirection = Input.mousePosition;
+            shootDirection = Camera.main.ScreenToWorldPoint(shootDirection);
+            shootDirection = shootDirection - (Vector2)transform.position;
+            float least = float.MaxValue;
+            if (Vector2.Distance(shootDirection, Vector2.up) < least)
+            {
+                least = Vector2.Distance(shootDirection, Vector2.up);
+                index = 0;
+            }
+            if (Vector2.Distance(shootDirection, Vector2.down) < least)
+            {
+                least = Vector2.Distance(shootDirection, Vector2.down);
+                index = 1;
+            }
+            if (Vector2.Distance(shootDirection, Vector2.left) < least)
+            {
+                least = Vector2.Distance(shootDirection, Vector2.left);
+                index = 2;
+            }
+            if (Vector2.Distance(shootDirection, Vector2.right) < least)
+            {
+                least = Vector2.Distance(shootDirection, Vector2.right);
+                index = 3;
+            }
+            if (arrows > 0) { 
+                if(index == 0)
+                {
+                    playerAnimator.SetTrigger("ShootUp");
+                    Debug.Log("SHOOTUP");
+                }
+                else if (index == 1)
+                {
+                    playerAnimator.SetTrigger("ShootDown");
+                }
+                else if (index == 2)
+                {
+                    playerAnimator.SetTrigger("ShootLeft");
+                }
+                else if (index == 3)
+                {
+                    playerAnimator.SetTrigger("ShootRight");
+                }
+                LevelUI.turns++;
+                timer = 1;
+
+            }
         }
     }
 
-
-
+    public void fire()
+    {
+        GameObject tempArrow = Instantiate(arrow, arrowSpawns[index].transform.position, arrowSpawns[index].transform.rotation);
+        arrows--;
+    }
 }
