@@ -14,8 +14,8 @@ public class Player : MonoBehaviour
     private Scene scene;
     public bool detectSwipeOnlyAfterRelease = true, tap;
     public float SWIPE_THRESHOLD = 40f, timer;
-    public GameObject coin1, coin2, coin3, enemy1, enemy2, enemy3, enemy4, arrow, finish;
-    public GameObject[] arrowSpawns;
+    public GameObject enemy1, enemy2, enemy3, enemy4, arrow, finish;
+    public GameObject[] arrowSpawns, coins;
     Animator playerAnimator;
     int index = 0;
 
@@ -35,12 +35,25 @@ public class Player : MonoBehaviour
         health = 3;
         if (scene.name == "Level1")
         {
-            arrows = 100;
+            arrows = 2;
+        }
+        else if(scene.name == "Level2")
+        {
+            arrows = 3;
+        }
+        else if (scene.name == "Level3")
+        {
+            arrows = 3;
+        }
+        else if (scene.name == "Level4")
+        {
+            arrows = 3;
         }
         coinCount = 0;
         paused = false;
         playerAnimator = gameObject.GetComponent<Animator>();
         timer = 0;
+        coins = GameObject.FindGameObjectsWithTag("coin");
     }
 
     void Update()
@@ -111,26 +124,20 @@ public class Player : MonoBehaviour
             OnSwipeDown();
         }
 
-        if (coin1.active && Vector2.Distance(this.transform.position, coin1.transform.position) < 1)
+        foreach (GameObject g in coins)
         {
-            coin1.SetActive(false);
-            coinCount++;
-            Debug.Log("coin1");
+            if(Vector2.Distance(this.transform.position, g.transform.position) < 1)
+            {
+                AudioSource.PlayClipAtPoint(SoundManager.coin, transform.position);
+                g.SetActive(false);
+                coinCount++;
+                coins = GameObject.FindGameObjectsWithTag("coin");
+            }
         }
-        else if (coin2.active && Vector2.Distance(this.transform.position, coin2.transform.position) < 1)
+
+        if (enemy1.active && Vector2.Distance(this.transform.position, enemy1.transform.position) < 1)
         {
-            coin2.SetActive(false);
-            coinCount++;
-            Debug.Log("coin2");
-        }
-        else if (coin3.active && Vector2.Distance(this.transform.position, coin3.transform.position) < 1)
-        {
-            coin3.SetActive(false);
-            coinCount++;
-            Debug.Log("coin3");
-        }
-        else if (enemy1.active && Vector2.Distance(this.transform.position, enemy1.transform.position) < 1)
-        {
+            AudioSource.PlayClipAtPoint(SoundManager.hurt, transform.position);
             enemy1.SetActive(false);
             kills++;
             health--;
@@ -138,6 +145,7 @@ public class Player : MonoBehaviour
         }
         else if (enemy2.active && Vector2.Distance(this.transform.position, enemy2.transform.position) < 1)
         {
+            AudioSource.PlayClipAtPoint(SoundManager.hurt, transform.position);
             enemy2.SetActive(false);
             kills++;
             health--;
@@ -145,6 +153,7 @@ public class Player : MonoBehaviour
         }
         else if (enemy3.active && Vector2.Distance(this.transform.position, enemy3.transform.position) < 1)
         {
+            AudioSource.PlayClipAtPoint(SoundManager.hurt, transform.position);
             enemy3.SetActive(false);
             kills++;
             health--;
@@ -152,6 +161,7 @@ public class Player : MonoBehaviour
         }
         else if (enemy4.active && Vector2.Distance(this.transform.position, enemy4.transform.position) < 1)
         {
+            AudioSource.PlayClipAtPoint(SoundManager.hurt, transform.position);
             enemy4.SetActive(false);
             kills++;
             health--;
@@ -231,8 +241,8 @@ public class Player : MonoBehaviour
         {
             playerAnimator.SetTrigger("WalkDown");
             iTween.MoveTo(this.gameObject, (this.transform.position - new Vector3(0, 2, 0)), 1);
+            LevelUI.turns++;
         }
-        LevelUI.turns++;
 
     }
 
@@ -240,13 +250,13 @@ public class Player : MonoBehaviour
     {
         Debug.Log("Swipe Left");
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.left);
-        //Debug.Log(Vector2.Distance(transform.position, hit.point));
+        Debug.Log(Vector2.Distance(transform.position, hit.point));
         if (hit.collider.gameObject.tag == "Enemy" || Vector2.Distance(transform.position, hit.point) > 1 && !paused)
         {
             playerAnimator.SetTrigger("WalkLeft");
             iTween.MoveTo(this.gameObject, (this.transform.position - new Vector3(2, 0, 0)), 1);
+            LevelUI.turns++;
         }
-        LevelUI.turns++;
 
     }
 
@@ -259,8 +269,8 @@ public class Player : MonoBehaviour
         {
             playerAnimator.SetTrigger("WalkRight");
             iTween.MoveTo(this.gameObject, (this.transform.position - new Vector3(-2, 0, 0)), 1);
+            LevelUI.turns++;
         }
-        LevelUI.turns++;
 
     }
 
@@ -314,7 +324,6 @@ public class Player : MonoBehaviour
                     playerAnimator.SetTrigger("ShootRight");
                 }
                 //GameObject tempArrow = Instantiate(arrow, arrowSpawns[index].transform.position, arrowSpawns[index].transform.rotation) ;
-                arrows--;
                 LevelUI.turns++;
                 timer = 1;
             }
@@ -346,8 +355,9 @@ public class Player : MonoBehaviour
                 least = Vector2.Distance(shootDirection, Vector2.right);
                 index = 3;
             }
-            if (arrows > 0) { 
-                if(index == 0)
+            if (arrows > 0)
+            {
+                if (index == 0)
                 {
                     playerAnimator.SetTrigger("ShootUp");
                     Debug.Log("SHOOTUP");
@@ -364,15 +374,16 @@ public class Player : MonoBehaviour
                 {
                     playerAnimator.SetTrigger("ShootRight");
                 }
+                //GameObject tempArrow = Instantiate(arrow, arrowSpawns[index].transform.position, arrowSpawns[index].transform.rotation) ;
                 LevelUI.turns++;
                 timer = 1;
-
             }
         }
     }
 
     public void fire()
     {
+        AudioSource.PlayClipAtPoint(SoundManager.shoot, transform.position);
         GameObject tempArrow = Instantiate(arrow, arrowSpawns[index].transform.position, arrowSpawns[index].transform.rotation);
         arrows--;
     }

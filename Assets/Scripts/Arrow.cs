@@ -20,6 +20,7 @@ public class Arrow : MonoBehaviour
         {
             if(Vector2.Distance(this.transform.position, g.transform.position) < 1)
             {
+                AudioSource.PlayClipAtPoint(SoundManager.hit, this.transform.position);
                 g.SetActive(false);
                 enemies = GameObject.FindGameObjectsWithTag("Enemy");
                 Player.kills++;

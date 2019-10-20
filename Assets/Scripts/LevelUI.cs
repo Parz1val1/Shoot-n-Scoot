@@ -119,6 +119,7 @@ public class LevelUI : MonoBehaviour
         }
         if(playerHealth <= 0)
         {
+            AudioSource.PlayClipAtPoint(SoundManager.lose, transform.position);
             loseScreen.SetActive(true);
             Player.paused = true;
             Time.timeScale = 0;
@@ -139,6 +140,7 @@ public class LevelUI : MonoBehaviour
     {
         if (won)
         {
+            AudioSource.PlayClipAtPoint(SoundManager.win, transform.position);
             winScreen.SetActive(true);
             Player.paused = true;
             Time.timeScale = 0;
